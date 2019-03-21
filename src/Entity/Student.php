@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\StudentRepository")
@@ -17,11 +19,15 @@ class Student
     private $id;
 
     /**
+     * @Assert\NotBlank
+     * @Groups({"default"})
      * @ORM\Column(type="string", length=255)
      */
     private $username;
 
     /**
+     * @Assert\NotBlank
+     * @Groups({"default"})
      * @ORM\Column(type="string", length=255)
      */
     private $password;

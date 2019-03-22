@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -32,6 +34,16 @@ class Student
      */
     private $password;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Grade", mappedBy="owner", orphanRemoval=true)
+     */
+    private $grades;
+
+    public function __construct()
+    {
+        $this->grades = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -57,6 +69,37 @@ class Student
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Grade[]
+     */
+    public function getGrades(): Collection
+    {
+        return $this->grades;
+    }
+
+    public function addGrade(Grade $grade): self
+    {
+        if (!$this->grades->contains($grade)) {
+            $this->grades[] = $grade;
+            $grade->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGrade(Grade $grade): self
+    {
+        if ($this->grades->contains($grade)) {
+            $this->grades->removeElement($grade);
+            // set the owning side to null (unless already changed)
+            if ($grade->getOwner() === $this) {
+                $grade->setOwner(null);
+            }
+        }
 
         return $this;
     }

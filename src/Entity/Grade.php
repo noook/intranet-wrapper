@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\GradeRepository")
@@ -18,28 +19,39 @@ class Grade
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"default"})
      */
     private $date;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"default"})
      */
     private $ECUE;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"default"})
      */
     private $project;
 
     /**
      * @ORM\Column(type="float")
+     * @Groups({"default"})
      */
     private $value;
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Groups({"default"})
      */
     private $comment;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Student", inversedBy="grades")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $owner;
 
     public function getId(): ?int
     {
@@ -102,6 +114,18 @@ class Grade
     public function setComment(?string $comment): self
     {
         $this->comment = $comment;
+
+        return $this;
+    }
+
+    public function getOwner(): ?Student
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?Student $owner): self
+    {
+        $this->owner = $owner;
 
         return $this;
     }

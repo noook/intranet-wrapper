@@ -22,8 +22,11 @@ class StudentController extends AbstractController
     /**
      * @Route("", name="new", methods={"POST"})
      */
-    public function newStudent(Request $request, StudentHandler $studentHandler): JsonResponse
-    {
+    public function newStudent(
+        Request $request,
+        IntranetClient $intranetClient,
+        StudentHandler $studentHandler
+    ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         $form = $this->createForm(NewStudentType::class, new Student);
         $form->submit($data);
@@ -33,6 +36,8 @@ class StudentController extends AbstractController
         }
         
         $student = $form->getData();
+        $intranetClient->login($student);
+
         $studentHandler->saveStudent($student);
         
         return $this->json(

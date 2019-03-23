@@ -8,6 +8,7 @@ use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use App\Entity\Student;
 use App\Entity\Grade;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class IntranetClient
 {
@@ -24,7 +25,7 @@ class IntranetClient
     
     public function login(Student $student): void
     {
-        $this->client->request('POST', 'http://intranet.supinternet.fr', [
+        $response = $this->client->request('POST', 'http://intranet.supinternet.fr', [
             'query' => [
                 'action' => 'login',
             ],
@@ -39,7 +40,14 @@ class IntranetClient
             'cookies' => $this->jar
         ]);
         
-        // TODO: Handle wrong logins here
+        $crawler = new Crawler((string) $response->getBody());
+        $isLoggedFilter = $this->cssSelectorConverter->toXPath('header #v_card #v_card_photo img');
+
+        try {
+            $crawler->filterXPath($isLoggedFilter)->html();
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException;
+        }
     }
     
     public function getGrades(Student $student): array

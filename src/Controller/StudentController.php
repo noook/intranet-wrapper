@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use App\Requests\IntranetClient;
 use App\Repository\StudentRepository;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\Form\StudentType;
 
 /**
  * @Route("/student", name="student_")
@@ -49,21 +50,25 @@ class StudentController extends AbstractController
     }
 
     /**
-     * @Route("/grades", name="grade", methods={"GET"})
+     * @Route("/grades", name="grade", methods={"POST"})
      */
     public function getStudentGrades(
         Request $request,
         IntranetClient $intranetClient,
         StudentRepository $studentRepository
     ): JsonResponse {
-        $username = $request->query->get('username');
+        $data = json_decode($request->getContent(), true);
+        $form = $this->createForm(StudentType::class, new Student);
+        $form->submit($data);
         
-        if (null !== $request->query->get('password')) {
-            $student = (new Student)
-                ->setUsername($username)
-                ->setPassword($request->query->get('password'));
-        } else {
-            $student = $studentRepository->findOneBy(['username' => $username]);
+        if (!$form->isValid()) {
+            throw new BadRequestHttpException;
+        }
+        
+        $student = $form->getData();
+        
+        if ($student->getPassword() == StudentType::PASSWORD_PLACEHOLDER) {
+            $student = $studentRepository->findOneBy(['username' => $student->getUsername()]);
         }
         
         if (null === $student) {

@@ -6,30 +6,28 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Form\NewStudentType;
-use App\Entity\Student;
-use App\DataHandler\StudentHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use App\Form\StudentType;
+use App\Entity\Student;
 use App\Requests\IntranetClient;
 use App\Repository\StudentRepository;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\Form\StudentType;
 
 /**
- * @Route("/student", name="student_")
+ * @Route("/grades", name="grades_")
  */
-class StudentController extends AbstractController
+class GradesController extends AbstractController
 {
     /**
-     * @Route("", name="new", methods={"POST"})
+     * @Route("/all", name="grade", methods={"POST"})
      */
-    public function newStudent(
+    public function getStudentGrades(
         Request $request,
         IntranetClient $intranetClient,
-        StudentHandler $studentHandler
+        StudentRepository $studentRepository
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
-        $form = $this->createForm(NewStudentType::class, new Student);
+        $form = $this->createForm(StudentType::class, new Student);
         $form->submit($data);
         
         if (!$form->isValid()) {
@@ -37,13 +35,20 @@ class StudentController extends AbstractController
         }
         
         $student = $form->getData();
-        $intranetClient->login($student);
+        
+        if ($student->getPassword() == StudentType::PASSWORD_PLACEHOLDER) {
+            $student = $studentRepository->findOneBy(['username' => $student->getUsername()]);
+        }
+        
+        if (null === $student) {
+            throw new NotFoundHttpException;
+        }
 
-        $studentHandler->saveStudent($student);
+        $grades = $intranetClient->getGrades($student);
         
         return $this->json(
-            ['student' => $student],
-            JsonResponse::HTTP_CREATED,
+            ['grades' => $grades],
+            JsonResponse::HTTP_OK,
             [],
             ['groups' => 'default']
         );

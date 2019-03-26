@@ -39,6 +39,12 @@ class Student
      */
     private $grades;
 
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\User", inversedBy="student", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $person;
+
     public function __construct()
     {
         $this->grades = new ArrayCollection();
@@ -100,6 +106,18 @@ class Student
                 $grade->setOwner(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPerson(): ?User
+    {
+        return $this->person;
+    }
+
+    public function setPerson(User $person): self
+    {
+        $this->person = $person;
 
         return $this;
     }

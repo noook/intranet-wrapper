@@ -22,6 +22,7 @@ class NewStudentType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Student::class,
+            'csrf_protection' => false,
         ]);
     }
 }

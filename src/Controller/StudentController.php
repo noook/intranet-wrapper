@@ -11,9 +11,6 @@ use App\Entity\Student;
 use App\DataHandler\StudentHandler;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use App\Requests\IntranetClient;
-use App\Repository\StudentRepository;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\Form\StudentType;
 
 /**
  * @Route("/student", name="student_")

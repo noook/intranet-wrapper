@@ -46,7 +46,7 @@ class IntranetClient
         try {
             $crawler->filterXPath($isLoggedFilter)->html();
         } catch (\InvalidArgumentException $e) {
-            throw new BadRequestHttpException;
+            throw new BadRequestHttpException('Bad credentials');
         }
     }
     
